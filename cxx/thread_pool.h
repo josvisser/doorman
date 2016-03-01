@@ -61,7 +61,7 @@ class ThreadPool {
   // This is a thread safe queue for putting work items on.
   class WorkQueue {
    public:
-    WorkQueue() : shutdown_(false) {} ;
+    WorkQueue() : shutdown_(false){};
 
     // Puts a new work item on the queue.
     void Put(std::function<void()> item);
