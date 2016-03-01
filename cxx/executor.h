@@ -32,12 +32,14 @@ namespace doorman {
 class Executor {
  public:
   // Creates an Executor with a default (potentially large) thread pool.
-  Executor() : Executor(std::numeric_limits<int>::max()) {}
+  Executor() : Executor(0, std::numeric_limits<int>::max()) {}
 
   // Creates an Executor with a thread pool of the specified maximum size.
   // Note: The thread pool must contain at least 1 thread!
-  Executor(int max_size);
+  Executor(int min, int max);
 
+  // At destruction all work that has been scheduled but not yet executed will
+  // be forgotten.
   ~Executor();
 
   // Schedules a new piece of work on the thread pool. The work gets scheduled

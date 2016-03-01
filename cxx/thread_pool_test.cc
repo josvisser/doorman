@@ -66,7 +66,6 @@ TEST(ThreadPoolTest, GrowsAndShrinks) {
       ++n2;
     });
   }
-  std::cout << "Step 0\n";
 
   // This means that 100 threads are executing, and the thread pool did not
   // grow beyond that.
@@ -82,7 +81,6 @@ TEST(ThreadPoolTest, GrowsAndShrinks) {
   }
 
   // All threads must be done.
-  std::cout << "Step 2\n";
   EXPECT_EQ(200, n2);
 
   // The thread pool must have shrunk.

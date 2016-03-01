@@ -14,6 +14,7 @@
 
 #include <cassert>
 #include <limits>
+#include <iostream>
 
 #include "cxx/thread_pool.h"
 
@@ -62,7 +63,7 @@ ThreadPool::ThreadPool(int min, int max)
   assert(max_ > 0);
 
   for (int i = 0; i < min_; ++i) {
-    CreateThread();
+    _CreateThread();
   }
 }
 
@@ -78,29 +79,29 @@ ThreadPool::~ThreadPool() {
 }
 
 void ThreadPool::Schedule(std::function<void()> callback) {
+  std::lock_guard<std::mutex> lock(mutex_);
+
   if (busy_threads_ == num_threads_ && num_threads_ < max_) {
     ++stats_.num_grow_events;
-    CreateThread();
+    _CreateThread();
   }
 
   work_q_.Put(callback);
 }
 
-// Warning: CreateThread should only be called in a context where you hold the
+// Warning: _CreateThread should only be called in a context where you hold the
 // mutex or are sure there is no contention (e.g. from the constructor).
-void ThreadPool::CreateThread() {
-  std::lock_guard<std::mutex> lock(mutex_);
-
+void ThreadPool::_CreateThread() {
   // Ensures that we do not grow beyond the maximum allowed.
   if (num_threads_ < max_) {
     ++num_threads_;
     ++num_theads_created_;
     threads_[num_theads_created_] =
-        std::thread(&ThreadPool::RunThread, this, num_theads_created_);
+        std::thread(&ThreadPool::_RunThread, this, num_theads_created_);
   }
 }
 
-void ThreadPool::RunThread(int index) {
+void ThreadPool::_RunThread(int index) {
   while (true) {
     // Gets a work item from the queue and executes it.
     std::function<void()> item = work_q_.Get();

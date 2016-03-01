@@ -61,6 +61,8 @@ class ThreadPool {
   // This is a thread safe queue for putting work items on.
   class WorkQueue {
    public:
+    WorkQueue() : shutdown_(false) {} ;
+
     // Puts a new work item on the queue.
     void Put(std::function<void()> item);
 
@@ -100,11 +102,11 @@ class ThreadPool {
   };
 
   // Creates a new worker thread in the pool.
-  void CreateThread();
+  void _CreateThread();
 
   // Each thread in the thread pool runs this main function. Passes in the
   // internal index in the threads_ vector.
-  void RunThread(int index);
+  void _RunThread(int index);
 
   // This mutex protects the shared state of the thread pool.
   std::mutex mutex_;

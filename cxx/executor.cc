@@ -20,7 +20,7 @@
 
 namespace doorman {
 
-Executor::Executor(int max_size) : thread_pool_(1, max_size) {
+Executor::Executor(int min, int max) : thread_pool_(min, max) {
   // Inserts a dummy callback at the end of time in the list of scheduled work
   // items.
   scheduled_item_list_.push_back(
