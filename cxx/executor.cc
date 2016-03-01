@@ -28,7 +28,7 @@ Executor::Executor(int min, int max) : thread_pool_(min, max) {
                     [] { throw "This should never happen"; }));
 
   // Starts the scheduler thread.
-  scheduler_thread_.reset(new std::thread(&Executor::SchedulerThread, this));
+  scheduler_thread_.reset(new std::thread(&Executor::_SchedulerThread, this));
 }
 
 Executor::~Executor() {
@@ -64,7 +64,7 @@ void Executor::ScheduleAt(const std::chrono::system_clock::time_point& when,
   }
 }
 
-void Executor::SchedulerThread() {
+void Executor::_SchedulerThread() {
   std::unique_lock<std::mutex> lock(mutex_);
 
   for (;;) {

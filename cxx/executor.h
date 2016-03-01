@@ -66,7 +66,7 @@ class Executor {
 
   // This is the Executor's thread which is responsible for dealing with
   // ScheduleAt().
-  void SchedulerThread();
+  void _SchedulerThread();
 
   // A mutex to protect the shared state of the Executor.
   std::mutex mutex_;
