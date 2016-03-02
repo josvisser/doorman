@@ -62,3 +62,30 @@ cc_test(
     "@gtest//:main",
   ],
 )
+
+cc_library(
+  name = "interval_release_queue",
+  srcs = [
+    "interval_release_queue.cc",
+  ],
+  hdrs = [
+    "interval_release_queue.h",
+  ],
+  deps = [
+    ":executor",
+  ],
+)
+
+cc_test(
+  name = "interval_release_queue_test",
+  srcs = [
+    "interval_release_queue_test.cc",
+  ],
+  copts = [
+    "-Iexternal/gtest/include",
+  ],
+  deps = [
+    ":interval_release_queue",
+    "@gtest//:main",
+  ],
+)

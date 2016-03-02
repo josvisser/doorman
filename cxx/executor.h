@@ -27,6 +27,8 @@
 
 namespace doorman {
 
+using Clock = std::chrono::system_clock;
+
 // Executor is an interface to a background system that runs works in threads
 // in a thread pool.
 class Executor {
@@ -50,17 +52,24 @@ class Executor {
 
   // Schedules a new piece of work on the thread pool at the specified time
   // point.
-  void ScheduleAt(const std::chrono::system_clock::time_point& when,
+  void ScheduleAt(const Clock::time_point& when,
                   std::function<void()> callback);
+
+  // Schedules a new piece of work on the thread pool after the specified
+  // duration.
+  void ScheduleIn(const Clock::duration& interval,
+                  std::function<void()> callback) {
+    ScheduleAt(Clock::now() + interval, callback);
+  }
 
  private:
   // An item of work which is scheduled for the future.
   struct ScheduledItem {
-    ScheduledItem(const std::chrono::system_clock::time_point& when,
+    ScheduledItem(const Clock::time_point& when,
                   std::function<void()> callback) :
       when_(when), callback_(callback) {}
 
-    std::chrono::system_clock::time_point when_;
+    Clock::time_point when_;
     std::function<void()> callback_;
   };
 

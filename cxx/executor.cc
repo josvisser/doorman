@@ -20,11 +20,11 @@
 
 namespace doorman {
 
-Executor::Executor(int min, int max) : thread_pool_(min, max) {
+Executor::Executor(int min, int max) : thread_pool_(min, max), please_exit_(false) {
   // Inserts a dummy callback at the end of time in the list of scheduled work
   // items.
   scheduled_item_list_.push_back(
-      ScheduledItem(std::chrono::system_clock::time_point::max(),
+      ScheduledItem(Clock::time_point::max(),
                     [] { throw "This should never happen"; }));
 
   // Starts the scheduler thread.
@@ -44,7 +44,7 @@ Executor::~Executor() {
   scheduler_thread_->join();
 }
 
-void Executor::ScheduleAt(const std::chrono::system_clock::time_point& when,
+void Executor::ScheduleAt(const Clock::time_point& when,
                           std::function<void()> callback) {
   std::lock_guard<std::mutex> lock(mutex_);
   auto first_event_time = scheduled_item_list_.front().when_;
