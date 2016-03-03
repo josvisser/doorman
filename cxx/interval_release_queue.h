@@ -2,6 +2,7 @@
 #define YOUTUBE_DOORMAN_CXX_INTERVAL_RELEASE_QUEUE_H_
 
 #include <chrono>
+#include <condition_variable>
 #include <cstdint>
 #include <deque>
 #include <functional>
@@ -58,7 +59,7 @@ class IntervalReleaseQueue {
   int64_t _Now();
 
   // Guards the internal state of this object.
-  mutable std::mutex lock_;
+  mutable std::mutex mutex_;
 
   // Release and callbacks are executed by this Executor.
   std::shared_ptr<Executor> executor_;
@@ -78,6 +79,10 @@ class IntervalReleaseQueue {
 
   // This deque maintains all the callbacks which are waiting to be released.
   std::deque<std::function<void()>> wait_queue_;
+
+  // Condition variable to be used to notify the destructor that the last
+  // _Release has run.
+  std::unique_ptr<std::condition_variable> destructor_;
 };
 
 }  // namespace doorman

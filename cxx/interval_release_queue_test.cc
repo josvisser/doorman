@@ -145,6 +145,7 @@ TEST_F(IntervalReleaseQueueTest, NonBlockingWaitDoesNotBlock) {
   t.Restart();
   q_.Wait([] {});
   EXPECT_BETWEEN(0, 1, t.Get<std::chrono::milliseconds>());
+  std::cout << "Done\n";
 }
 
 // Rate of 1/10msec (100 qps). 1000 operations should take 10 seconds.

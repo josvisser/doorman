@@ -31,7 +31,7 @@ IntervalReleaseQueue::IntervalReleaseQueue()
 
 // The destructor releases all waiting callbacks.
 IntervalReleaseQueue::~IntervalReleaseQueue() {
-  std::unique_lock<std::mutex> lock(lock_);
+  std::unique_lock<std::mutex> lock(mutex_);
 
   // If there is an invocation of _Release() scheduled that means that there
   // are callbacks waiting to be released. In that case we release them all
@@ -43,9 +43,9 @@ IntervalReleaseQueue::~IntervalReleaseQueue() {
     // We now wait until release_scheduled_ goes false, because that is a sign
     // that _Release has run. Because rate_limit_<0 a new release will not be
     // scheduled.
-    std::condition_variable cond;
-
-    cond.wait(lock, [this]() -> bool { return !release_scheduled_; });
+    destructor_.reset(new std::condition_variable);
+    destructor_->wait(lock,
+        [this]() -> bool { return !release_scheduled_; });
   }
 
   // At this point the wait_queue_ should be empty.
@@ -60,7 +60,7 @@ int64_t IntervalReleaseQueue::_Now() {
 }
 
 void IntervalReleaseQueue::SetRateLimit(int rate_limit, int interval_msec) {
-  std::lock_guard<std::mutex> lock(lock_);
+  std::lock_guard<std::mutex> lock(mutex_);
 
   rate_limit_ = rate_limit;
   interval_msec_ = interval_msec;
@@ -106,9 +106,13 @@ void IntervalReleaseQueue::_Release() {
     executor_->ScheduleIn(
         std::chrono::milliseconds(*times_.begin() + interval_msec_ - now),
         [this] {
-          std::lock_guard<std::mutex> lock(lock_);
+          std::lock_guard<std::mutex> lock(mutex_);
           _Release();
           release_scheduled_ = false;
+
+          if (destructor_.get() != nullptr) {
+            destructor_->notify_one();
+          }
         });
     release_scheduled_ = true;
   }
@@ -117,7 +121,7 @@ void IntervalReleaseQueue::_Release() {
 // Adds the callback to the waiting queue and calls Release() if
 // there is a chance that it can be released immediately.
 void IntervalReleaseQueue::Wait(std::function<void()> callback) {
-  std::lock_guard<std::mutex> lock(lock_);
+  std::lock_guard<std::mutex> lock(mutex_);
 
   wait_queue_.push_back(callback);
 
