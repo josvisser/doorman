@@ -137,12 +137,17 @@ void IntervalReleaseQueue::Wait(std::function<void()> callback) {
 // operation.
 void IntervalReleaseQueue::Wait() {
   std::mutex mutex;
+  std::unique_lock<std::mutex> lock(mutex);
+  std::condition_variable cond;
+  bool signaled = false;
 
-  mutex.lock();
   Wait([&] {
-    mutex.unlock();
+      std::lock_guard<std::mutex> lock(mutex);
+      signaled = true;
+      cond.notify_one();
   });
-  mutex.lock();
+
+  cond.wait(lock, [&]() -> bool { return signaled; });
 }
 
 }  // namespace doorman

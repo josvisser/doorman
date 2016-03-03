@@ -72,11 +72,18 @@ class IntervalReleaseQueueTest : public ::testing::Test {
     while (num_loops-- > 0) {
       q_.Wait([&] {
         std::lock_guard<std::mutex> lock(mutex);
-        --n;
+        std::cout << "loop n = " << n << std::endl;
+
+        if (--n == 0) {
+          cond.notify_one();
+          std::cout<<"notify\n";
+        }
       });
     }
 
-    cond.wait(lock, [&]() -> bool { return n == 0; });
+    std::cout<<"start wait\n";
+    cond.wait(lock, [&]() -> bool { std::cout << "predicate\n"; return n == 0; });
+    std::cout<<"end wait\n";
 
     return t.Get<std::chrono::milliseconds>();
   }
@@ -150,7 +157,8 @@ TEST_F(IntervalReleaseQueueTest, NonBlockingWaitDoesNotBlock) {
 
 // Rate of 1/10msec (100 qps). 1000 operations should take 10 seconds.
 TEST_F(IntervalReleaseQueueTest, BasicOperationNonBlockingWait) {
-  EXPECT_BETWEEN(10, 12, SingleThreadedTestUsingNonBlockingWait(1, 10, 1000));
+  EXPECT_BETWEEN(10000, 12000,
+                 SingleThreadedTestUsingNonBlockingWait(1, 10, 1000));
 }
 
 // Negative limit means queue is not rate limited.
