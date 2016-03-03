@@ -72,18 +72,14 @@ class IntervalReleaseQueueTest : public ::testing::Test {
     while (num_loops-- > 0) {
       q_.Wait([&] {
         std::lock_guard<std::mutex> lock(mutex);
-        std::cout << "loop n = " << n << std::endl;
 
         if (--n == 0) {
           cond.notify_one();
-          std::cout<<"notify\n";
         }
       });
     }
 
-    std::cout<<"start wait\n";
-    cond.wait(lock, [&]() -> bool { std::cout << "predicate\n"; return n == 0; });
-    std::cout<<"end wait\n";
+    cond.wait(lock, [&]() -> bool { return n == 0; });
 
     return t.Get<std::chrono::milliseconds>();
   }
@@ -152,7 +148,6 @@ TEST_F(IntervalReleaseQueueTest, NonBlockingWaitDoesNotBlock) {
   t.Restart();
   q_.Wait([] {});
   EXPECT_BETWEEN(0, 1, t.Get<std::chrono::milliseconds>());
-  std::cout << "Done\n";
 }
 
 // Rate of 1/10msec (100 qps). 1000 operations should take 10 seconds.
@@ -206,9 +201,9 @@ class Worker {
 
  private:
   void _Run() {
-    while (!stop_) {
+    while (!*stop_) {
       q_->Wait();
-      ++num_;
+      ++(*num_);
     }
   }
 
@@ -226,6 +221,7 @@ TEST_F(IntervalReleaseQueueTest, MultiThreadedTest) {
   std::atomic_bool stop(false);
   std::atomic_int num(0);
 
+  // Blocks the queue.
   q_.SetRateLimit(0, 0);
 
   for (int i = 0; i < kNumThreads; ++i) {
@@ -233,7 +229,11 @@ TEST_F(IntervalReleaseQueueTest, MultiThreadedTest) {
   }
 
   sleep(1);
+  EXPECT_EQ(0, num);
+  // Rate limit of 100 qps.
   q_.SetRateLimit(10, 100);
+  // Sleeps for 10 seconds. The threads should be able to do about 1000
+  // iterations in that time.
   sleep(10);
   stop = true;
 
@@ -241,7 +241,7 @@ TEST_F(IntervalReleaseQueueTest, MultiThreadedTest) {
     delete worker;
   }
 
-  EXPECT_BETWEEN(900, 1100, (int)num);
+  EXPECT_BETWEEN(900, 1200, (int)num);
 }
 
 }  // namespace

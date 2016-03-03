@@ -80,6 +80,27 @@ void IntervalReleaseQueue::_ClearOldEvents(int64_t now) {
   }
 }
 
+// Schedules a call to _Release() if one is necessary.
+void IntervalReleaseQueue::_ScheduleReleaseIfNecessary(int64_t now) {
+  if (!release_scheduled_ && wait_queue_.size() > 0 && rate_limit_ != 0) {
+    executor_->ScheduleIn(
+        std::chrono::milliseconds(*times_.begin() + interval_msec_ - now),
+        [this] {
+          std::lock_guard<std::mutex> lock(mutex_);
+          // Note: Do not move this to after the call to _Release(), because
+          // _Release calls _ScheduleReleaseIfNecessary and we don't want to
+          // overwrite release_scheduled after we just set it to true again.
+          release_scheduled_ = false;
+          _Release();
+
+          if (destructor_.get() != nullptr) {
+            destructor_->notify_one();
+          }
+        });
+    release_scheduled_ = true;
+  }
+}
+
 // Releases whatever can be released right now and schedules a new invocation
 // of itself if there is a need for that.
 void IntervalReleaseQueue::_Release() {
@@ -102,20 +123,7 @@ void IntervalReleaseQueue::_Release() {
   // If there is no release scheduled yet and there are callbacks still in the
   // queue which need to be released starting at the next interval we schedule
   // a new invocation of Release().
-  if (!release_scheduled_ && wait_queue_.size() > 0 && rate_limit_ != 0) {
-    executor_->ScheduleIn(
-        std::chrono::milliseconds(*times_.begin() + interval_msec_ - now),
-        [this] {
-          std::lock_guard<std::mutex> lock(mutex_);
-          _Release();
-          release_scheduled_ = false;
-
-          if (destructor_.get() != nullptr) {
-            destructor_->notify_one();
-          }
-        });
-    release_scheduled_ = true;
-  }
+  _ScheduleReleaseIfNecessary(now);
 }
 
 // Adds the callback to the waiting queue and calls Release() if

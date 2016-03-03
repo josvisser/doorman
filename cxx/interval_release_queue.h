@@ -51,6 +51,9 @@ class IntervalReleaseQueue {
   // queue's Executor.
   void _Release();
 
+  // Schedules a call to _Release() if one is necessary.
+  void _ScheduleReleaseIfNecessary(int64_t now);
+
   // Removes old events from the times_ deque. Old events are events that
   // happened before the start of the current interval.
   void _ClearOldEvents(int64_t now);
