@@ -27,12 +27,12 @@ cc_test(
   srcs = [
     "thread_pool_test.cc",
   ],
-  copts = [
-    "-Iexternal/gtest/include",
-  ],
   deps = [
     ":thread_pool",
-    "@gtest//:main",
+    "//external:gtest_ext",
+  ],
+  copts = [
+    "-Iexternal/gtest/include",
   ],
 )
 
@@ -54,12 +54,12 @@ cc_test(
   srcs = [
     "executor_test.cc",
   ],
-  copts = [
-    "-Iexternal/gtest/include",
-  ],
   deps = [
     ":executor",
-    "@gtest//:main",
+    "//external:gtest_ext",
+  ],
+  copts = [
+    "-Iexternal/gtest/include",
   ],
 )
 
@@ -81,11 +81,11 @@ cc_test(
   srcs = [
     "interval_release_queue_test.cc",
   ],
-  copts = [
-    "-Iexternal/gtest/include",
-  ],
   deps = [
     ":interval_release_queue",
-    "@gtest//:main",
+    "//external:gtest_ext",
+  ],
+  copts = [
+    "-Iexternal/gtest/include",
   ],
 )
