@@ -36,3 +36,15 @@ bind(
   name = "libssl",
   actual = "//cxx:openssl",
 )
+
+new_git_repository(
+  name = "zlib128",
+  build_file = "zlib.BUILD",
+  remote = "https://github.com/madler/zlib.git",
+  tag = "v1.2.8",
+)
+
+bind(
+  name = "zlib",
+  actual = "@zlib128//:main",
+)

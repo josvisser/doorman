@@ -13,98 +13,98 @@
 # limitations under the License.
 
 cc_library(
-  name = "thread_pool",
-  srcs = [
-    "thread_pool.cc",
-  ],
-  hdrs = [
-    "thread_pool.h",
-  ],
+    name = "thread_pool",
+    srcs = [
+        "thread_pool.cc",
+    ],
+    hdrs = [
+        "thread_pool.h",
+    ],
 )
 
 cc_test(
-  name = "thread_pool_test",
-  srcs = [
-    "thread_pool_test.cc",
-  ],
-  deps = [
-    ":thread_pool",
-    "//external:gtest_ext",
-  ],
-  copts = [
-    "-Iexternal/gtest/include",
-  ],
+    name = "thread_pool_test",
+    srcs = [
+        "thread_pool_test.cc",
+    ],
+    copts = [
+        "-Iexternal/gtest/include",
+    ],
+    deps = [
+        ":thread_pool",
+        "//external:gtest_ext",
+    ],
 )
 
 cc_library(
-  name = "executor",
-  srcs = [
-    "executor.cc",
-  ],
-  hdrs = [
-    "executor.h",
-  ],
-  deps = [
-    ":thread_pool",
-  ],
+    name = "executor",
+    srcs = [
+        "executor.cc",
+    ],
+    hdrs = [
+        "executor.h",
+    ],
+    deps = [
+        ":thread_pool",
+    ],
 )
 
 cc_test(
-  name = "executor_test",
-  srcs = [
-    "executor_test.cc",
-  ],
-  deps = [
-    ":executor",
-    "//external:gtest_ext",
-  ],
-  copts = [
-    "-Iexternal/gtest/include",
-  ],
+    name = "executor_test",
+    srcs = [
+        "executor_test.cc",
+    ],
+    copts = [
+        "-Iexternal/gtest/include",
+    ],
+    deps = [
+        ":executor",
+        "//external:gtest_ext",
+    ],
 )
 
 cc_library(
-  name = "interval_release_queue",
-  srcs = [
-    "interval_release_queue.cc",
-  ],
-  hdrs = [
-    "interval_release_queue.h",
-  ],
-  deps = [
-    ":executor",
-  ],
+    name = "interval_release_queue",
+    srcs = [
+        "interval_release_queue.cc",
+    ],
+    hdrs = [
+        "interval_release_queue.h",
+    ],
+    deps = [
+        ":executor",
+    ],
 )
 
 cc_test(
-  name = "interval_release_queue_test",
-  srcs = [
-    "interval_release_queue_test.cc",
-  ],
-  deps = [
-    ":interval_release_queue",
-    "//external:gtest_ext",
-  ],
-  copts = [
-    "-Iexternal/gtest/include",
-  ],
+    name = "interval_release_queue_test",
+    srcs = [
+        "interval_release_queue_test.cc",
+    ],
+    copts = [
+        "-Iexternal/gtest/include",
+    ],
+    deps = [
+        ":interval_release_queue",
+        "//external:gtest_ext",
+    ],
 )
 
 cc_library(
-  name = "openssl",
-  srcs = ["cxx/third_party/openssl/lib/openssl.a"],
-  # hdrs = [glob("cxx/third_party/openinclude/*.h")],
+    name = "openssl",
+    srcs = glob(["third_party/openssl/lib*.a"]),
+    visibility = ["//visibility:public"],
 )
 
 cc_library(
-  name = "doorman_client",
-  srcs = [
-    "doorman_client.cc",
-  ],
-  hdrs = [
-    "doorman_client.h",
-  ],
-  deps = [
-    "//external:grpc_ext",
-  ],
+    name = "doorman_client",
+    srcs = [
+        "doorman_client.cc",
+    ],
+    hdrs = [
+        "doorman_client.h",
+    ],
+    deps = [
+        "//external:grpc_ext",
+    ],
 )
