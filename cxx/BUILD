@@ -89,3 +89,16 @@ cc_test(
     "-Iexternal/gtest/include",
   ],
 )
+
+cc_library(
+  name = "doorman_client",
+  srcs = [
+    "doorman_client.cc",
+  ],
+  hdrs = [
+    "doorman_client.h",
+  ],
+  deps = [
+    "//external:grpc_ext",
+  ],
+)
