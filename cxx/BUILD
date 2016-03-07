@@ -91,6 +91,12 @@ cc_test(
 )
 
 cc_library(
+  name = "openssl",
+  srcs = ["cxx/third_party/openssl/lib/openssl.a"],
+  # hdrs = [glob("cxx/third_party/openinclude/*.h")],
+)
+
+cc_library(
   name = "doorman_client",
   srcs = [
     "doorman_client.cc",

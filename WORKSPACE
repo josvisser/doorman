@@ -31,3 +31,8 @@ bind(
   name = "protobuf_clib",
   actual = "@proto3//:protobuf",
 )
+
+bind(
+  name = "libssl",
+  actual = "//cxx:openssl",
+)
