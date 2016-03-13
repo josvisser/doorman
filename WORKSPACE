@@ -34,7 +34,7 @@ bind(
 
 bind(
   name = "libssl",
-  actual = "//cxx:openssl",
+  actual = "//cxx:dummy",
 )
 
 new_git_repository(

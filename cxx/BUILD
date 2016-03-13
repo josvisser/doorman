@@ -108,3 +108,8 @@ cc_library(
         "//external:grpc_ext",
     ],
 )
+
+cc_library(
+    name = "dummy",
+    visibility = ["//visibility:public"]
+)
